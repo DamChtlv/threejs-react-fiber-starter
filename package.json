@@ -11,6 +11,7 @@
     "build": "concurrently --names 'VITE,TAILWIND' -c 'bgYellow.bold,bgCyan.bold' 'vite build' 'npm run tailbuild'"
   },
   "dependencies": {
+    "@react-three/drei": "9.32",
     "@react-three/fiber": "8.8",
     "autoprefixer": "^10.4.13",
     "concurrently": "^7.6.0",

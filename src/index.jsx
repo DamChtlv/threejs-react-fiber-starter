@@ -17,14 +17,6 @@ const cameraSettings = {
 
 root.render(
     <Canvas
-        // orthographic // Set camera style to orthographic
-        // flat // Set linear encodings to flat
-        // dpr={[ 1, 2 ]} //? set pixel resolution, default value
-        gl={{
-            // antialias: false, // Set antialias off
-            // toneMapping: THREE.ACESFilmicToneMapping, // Change light encoding
-            // outputEncoding: THREE.LinearEncoding // Change color encoding
-        }}
         camera={cameraSettings}
     >
         <Experience />
