@@ -3,9 +3,5 @@
 @tailwind utilities;
 
 html,body,#root {
-    background-color: lightskyblue;
-}
-
-.label > div {
-    /* position: absolute; */
+    background-color: ivory;
 }

@@ -1,24 +1,32 @@
 import './style.css'
 
-import React from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Canvas } from "@react-three/fiber";
 import Experience from './Experience';
-import * as THREE from 'three'
+// import * as THREE from 'three'
+import { Leva } from 'leva';
 
 const root = createRoot(document.getElementById('root'));
-const cameraSettings = {
-    fov: 45,
-    near: 0.1,
-    far: 200,
-    // zoom: 100,
-    position: [ 3, 2, 6 ]
-}
 
 root.render(
-    <Canvas
-        camera={cameraSettings}
-    >
-        <Experience />
-    </Canvas>
+    <StrictMode> {/* StrictMode is a debug helper from React */}
+
+        <Leva collapsed={false} /> {/* Leva is a GUI to display controls */}
+
+        <Canvas
+            shadows={false}
+            camera={{
+                fov: 45,
+                near: 0.1,
+                far: 200,
+                // zoom: 100,
+                position: [ -4, 3, 8 ]
+            }}>
+
+            <Experience /> {/* Our custom experience component */}
+
+        </Canvas>
+
+    </StrictMode>
 )
