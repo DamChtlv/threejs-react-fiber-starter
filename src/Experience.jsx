@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'; // UseThree is to get ThreeJS data & useFrame to do something every frame
-import { ContactShadows, RandomizedLight, AccumulativeShadows, softShadows, BakeShadows, useHelper, MeshReflectorMaterial, Float, Text, Html, PivotControls, OrbitControls, TransformControls } from '@react-three/drei'; // Really cool helpers for R3F
+import { Stage, Lightformer, Environment, Sky, ContactShadows, RandomizedLight, AccumulativeShadows, softShadows, BakeShadows, useHelper, MeshReflectorMaterial, Float, Text, Html, PivotControls, OrbitControls, TransformControls } from '@react-three/drei'; // Really cool helpers for R3F
 import { useControls, button } from 'leva'; // useControls is a GUI to control values
 import { Perf } from 'r3f-perf'; // Perf is a UI that display performances infos
 import * as THREE from 'three';
@@ -22,23 +22,23 @@ export default function Experience() {
     })
 
     // Sphere controls
-    const { position, color, visible } = useControls('sphere', {
-        position: {
+    const { spPosition, spColor, spVisible } = useControls('sphere', {
+        spPosition: {
             value: {
                 x: -2.5,
-                y: 0,
+                y: 1,
             },
             step: 0.01,
             joystick: 'invertY'
         },
-        color: '#14beb1',
-        visible: true,
+        spColor: '#14beb1',
+        spVisible: true,
         clickMe: button(() => { console.log('test') }),
     })
 
     // Cube controls
-    const { scale } = useControls('cube', {
-        scale: {
+    const { cuScale } = useControls('cube', {
+        cuScale: {
             value: 1.5,
             step: 0.01,
             min: 0,
@@ -47,22 +47,35 @@ export default function Experience() {
     })
 
     // Shadow controls
-    const { sBlur, sOpacity, sColor } = useControls('shadows', {
-        sBlur: {
-            value: 2.4,
-            step: 0.01,
+    const { shBlur, shOpacity, shColor } = useControls('shadows', {
+        shBlur: {
+            value: 3,
             min: 0,
             max: 5,
         },
-        sOpacity: {
-            value: .68,
-            step: 0.01,
+        shOpacity: {
+            value: .5,
             min: 0,
             max: 1,
         },
-        sColor: {
-            value: "#494c58"
+        shColor: {
+            value: "#271a07"
         },
+    })
+
+    // Sky controls
+    const { sunPosition } = useControls('sky', {
+        sunPosition: {
+            value: [ 1, 2, 3 ]
+        }
+    })
+
+    // Environment Map controls
+    const { envMapIntensity, envMapHeight, envMapRadius, envMapScale } = useControls('envmap', {
+        envMapIntensity: { value: 1, min: 0, max: 12 },
+        envMapHeight: { value: 8.2, min: 0, max: 10 },
+        envMapRadius: { value: 33.2, min: 10, max: 50 },
+        envMapScale: { value: 19, min: 10, max: 150 },
     })
 
     // Refs
@@ -70,13 +83,19 @@ export default function Experience() {
     const cubeRef = useRef()
     const sphereRef = useRef()
     const planeRef = useRef()
+    const pivotRef = useRef()
 
-    // Set light helper
+    const [ pivotData, setPivotData ] = useState([ false, false ])
+
+    /* Set light helper */
     const directionalLightRef = useRef()
     useHelper(directionalLightRef, THREE.DirectionalLightHelper, 0.5)
 
     /* UseThree is a ReactFiber hook to get ThreeJS data */
     const { camera, gl } = useThree()
+
+    /* Hooking on onDrag of pivot seems to update his dynamic shadow position even if shadow are freeze / set to frames={1} */
+    const onPivotDrag = (l, deltaL, w, deltaW) => setPivotData([ deltaL, deltaW ])
 
     /*
     UseFrame is called on each frame and is recommanded to animate (for good perfs)
@@ -94,6 +113,11 @@ export default function Experience() {
         cubeRef.current.rotation.y += delta
     })
 
+    useEffect((pivotData) => {
+        // console.log('coucou');
+        // console.log(pivotData);
+    }, [ pivotData ])
+
     return <>
 
         {/* Scene background color */}
@@ -104,6 +128,40 @@ export default function Experience() {
 
         {/* Controls orientation of the scene */}
         <OrbitControls makeDefault />
+
+        {/* Environment map is used to have natural lights &/or background images */}
+        {/* <Environment
+            // background // Enable environment map as background images
+            preset='sunset' // Drei has some default environment maps usable using "preset"
+            ground={ {
+                height: envMapHeight,
+                radius: envMapRadius,
+                scale: envMapScale,
+             } }
+            // resolution={32}
+            // files={ './environmentMaps/the_sky_is_on_fire_2k.hdr' }
+            // files={[
+            //     './environmentMaps/2/px.jpg',
+            //     './environmentMaps/2/nx.jpg',
+            //     './environmentMaps/2/py.jpg',
+            //     './environmentMaps/2/ny.jpg',
+            //     './environmentMaps/2/pz.jpg',
+            //     './environmentMaps/2/nz.jpg',
+            // ]}
+        > */}
+        {/* <color args={[ 'black' ]} attach="background" />
+            <Lightformer
+                position-z={-5}
+                scale={10}
+                color="red"
+                intensity={ 10 }
+                form="ring"
+            /> */}
+        {/* <mesh position-z={-2} scale={10}>
+                <planeGeometry />
+                <meshBasicMaterial color={ [10, 0, 0] } />
+            </mesh> */}
+        {/* </Environment> */}
 
         {/* <AccumulativeShadows
             position={ [ 0, -0.99, 0 ] }
@@ -124,20 +182,21 @@ export default function Experience() {
                 />
         </AccumulativeShadows> */}
 
-        <ContactShadows
-            position={[ 0, -0.99, 0 ]}
-            scale={ 10 }
-            resolution={ 512 }
+        {/* <ContactShadows
+            position={[ 0, 0, 0 ]}
+            scale={10}
+            resolution={512}
             far={5}
-            color={sColor}
-            opacity={sOpacity}
-            blur={sBlur}
-            />
+            color={shColor}
+            opacity={shOpacity}
+            blur={shBlur}
+            frames={1}
+        /> */}
 
         {/* Lights */}
-        <directionalLight
+        {/* <directionalLight
             ref={directionalLightRef}
-            position={[ 1, 2, 3 ]}
+            position={ sunPosition }
             intensity={1.5}
             castShadow
             shadow-mapSize={[ 1024, 1024 ]}
@@ -148,7 +207,10 @@ export default function Experience() {
             shadow-camera-bottom={-5}
             shadow-camera-left={-5}
         />
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.5} /> */}
+
+        {/* Sky */}
+        {/* <Sky sunPosition={ sunPosition } /> */}
 
         {/* Fix shadows on the first frame (shadow doesn't move if your object is moving) */}
         {/* <BakeShadows /> */}
@@ -161,43 +223,45 @@ export default function Experience() {
                 anchor={[ 0, 0, 0 ]}
                 depthTest={false}
                 lineWidth={4}
-                axisColors={[ '#9381ff', '#ff4d6d', '#7ae582' ]}
+                axishColors={[ '#9381ff', '#ff4d6d', '#7ae582' ]}
+                onDrag={onPivotDrag}
+                ref={pivotRef}
             > */}
-            <mesh ref={sphereRef} castShadow position={[ position.x, position.y, 0 ]} visible={visible}>
-                <sphereGeometry />
-                <meshStandardMaterial color={color} />
-                <Html
-                    position={[ -1, 1, 0 ]}
-                    wrapperClass="label | font-sans relative flex bg-[#00000088] text-white p-4 overflow-hidden rounded-full w-auto whitespace-nowrap select-none"
-                    style={{ position: 'relative' }}
-                    distanceFactor={6}
-                    occlude={[ sphereRef, cubeRef ]}
-                >Trop fort mon amour 😄
-                </Html>
-            </mesh>
+            {/* <mesh ref={sphereRef} castShadow position={[ spPosition.x, spPosition.y, 0 ]} visible={spVisible}>
+                    <sphereGeometry />
+                    <meshStandardMaterial envMapIntensity={envMapIntensity} color={spColor} />
+                    <Html
+                        position={[ -1, 1, 0 ]}
+                        wrapperClass="label | font-sans relative flex bg-[#00000088] text-white p-4 overflow-hidden rounded-full w-auto whitespace-nowrap select-none"
+                        style={{ position: 'relative' }}
+                        distanceFactor={6}
+                        occlude={[ sphereRef, cubeRef ]}
+                    >That's a sphere 😄
+                    </Html>
+                </mesh> */}
             {/* </PivotControls> */}
 
             {/* Cube */}
-            <mesh ref={cubeRef} castShadow rotation-y={Math.PI * 0.23} position-x={2} scale={scale}>
+            {/* <mesh ref={cubeRef} castShadow rotation-y={Math.PI * 0.23} position-x={2} position-y={1} scale={cuScale}>
                 <boxGeometry scale={1.5} />
-                <meshStandardMaterial color="mediumpurple" />
-            </mesh>
+                <meshStandardMaterial color="mediumpurple" envMapIntensity={envMapIntensity} />
+            </mesh> */}
             {/* <TransformControls object={cubeRef} mode="translate" /> */}
 
         </group>
 
         {/* Floor */}
-        <mesh ref={planeRef} rotation-x={-Math.PI * 0.5} scale={10} position-y={-1}>
-            <planeGeometry />
-            <meshStandardMaterial color="greenyellow" />
-            {/* <MeshReflectorMaterial
+        {/* <mesh ref={planeRef} rotation-x={-Math.PI * 0.5} scale={10} position-y={0}> */}
+        {/* <planeGeometry />
+            <meshStandardMaterial color="greenyellow" envMapIntensity={envMapIntensity} /> */}
+        {/* <MeshReflectorMaterial
                 resolution={512}
                 blur={[ 1000, 2000 ]}
                 mixBlur={.75}
                 mirror={.75}
                 color="lightgray"
             /> */}
-        </mesh>
+        {/* </mesh> */}
 
         {/* Floating text */}
         <Float
@@ -208,13 +272,30 @@ export default function Experience() {
                 fontSize={1}
                 color="salmon"
                 style={{ textTransform: 'uppercase' }}
-                position-y={2}
+                position-y={3}
                 maxWidth={2}
                 textAlign="center">
                 Hello there!
-                <meshStandardMaterial side={2} />
+                <meshStandardMaterial envMapIntensity={envMapIntensity} side={2} />
             </Text>
         </Float>
+
+        <Stage
+            contactShadow={{ opacity: 0.2, blur: 3 }}
+            environment='sunset'
+            preset='portrait'
+            intensity={ 1.5 }
+        >
+            <mesh ref={cubeRef} castShadow rotation-y={Math.PI * 0.23} position-x={2} position-y={1} scale={cuScale}>
+                <boxGeometry scale={1.5} />
+                <meshStandardMaterial color="mediumpurple" envMapIntensity={envMapIntensity} />
+            </mesh>
+
+            <mesh ref={sphereRef} castShadow position={[ spPosition.x, spPosition.y, 0 ]} visible={spVisible}>
+                <sphereGeometry />
+                <meshStandardMaterial envMapIntensity={envMapIntensity} color={spColor} />
+            </mesh>
+        </Stage>
 
     </>
 }
