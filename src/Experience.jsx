@@ -1,9 +1,11 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useThree, useFrame } from '@react-three/fiber'; // UseThree is to get ThreeJS data & useFrame to do something every frame
+import { Suspense, useState, useEffect, useMemo, useRef } from 'react'
+import { useLoader, useThree, useFrame } from '@react-three/fiber'; // UseThree is to get ThreeJS data & useFrame to do something every frame
 import { Stage, Lightformer, Environment, Sky, ContactShadows, RandomizedLight, AccumulativeShadows, softShadows, BakeShadows, useHelper, MeshReflectorMaterial, Float, Text, Html, PivotControls, OrbitControls, TransformControls } from '@react-three/drei'; // Really cool helpers for R3F
 import { useControls, button } from 'leva'; // useControls is a GUI to control values
 import { Perf } from 'r3f-perf'; // Perf is a UI that display performances infos
-import * as THREE from 'three';
+// import * as THREE from 'three';
+import Model from './components/Model';
+import Placeholder from './components/Placeholder';
 
 // Make shadows more blurry when there are far from their elements
 // softShadows({
@@ -84,35 +86,33 @@ export default function Experience() {
     const sphereRef = useRef()
     const planeRef = useRef()
     const pivotRef = useRef()
+    const directionalLightRef = useRef()
 
     const [ pivotData, setPivotData ] = useState([ false, false ])
 
     /* Set light helper */
-    const directionalLightRef = useRef()
-    useHelper(directionalLightRef, THREE.DirectionalLightHelper, 0.5)
+    // useHelper(directionalLightRef, THREE.DirectionalLightHelper, 0.5)
 
-    /* UseThree is a ReactFiber hook to get ThreeJS data */
+    /* UseThree is a ReactFiber hook to get ThreeJS data on first frame */
     const { camera, gl } = useThree()
-
-    /* Hooking on onDrag of pivot seems to update his dynamic shadow position even if shadow are freeze / set to frames={1} */
-    const onPivotDrag = (l, deltaL, w, deltaW) => setPivotData([ deltaL, deltaW ])
 
     /*
     UseFrame is called on each frame and is recommanded to animate (for good perfs)
     delta is used as "time / tick" variable
     */
     useFrame((state, delta) => {
-
         /* Make camera rotate the scene */
-        // const camera = state.camera ?? null
+        const camera = state.camera ?? null
+        // console.log(camera.position);
         // const angle = state.clock.elapsedTime ?? null
-        // camera.position.x = Math.sin(angle) * 8
-        // camera.position.z = Math.cos(angle) * 8
-        // camera.lookAt(0, 0, 0)
+        // camera.position.x = Math.sin(angle / 10) * 8
+        // camera.position.z = Math.cos(angle / 10) * 8
+        // camera.lookAt(0, 3, 0)
         // cubeRef.current.position.x = 2 + Math.sin(angle)
-        cubeRef.current.rotation.y += delta
     })
 
+    /* Hooking on onDrag of pivot seems to update his dynamic shadow position even if shadow are freeze / set to frames={1} */
+    const onPivotDrag = (l, deltaL, w, deltaW) => setPivotData([ deltaL, deltaW ])
     useEffect((pivotData) => {
         // console.log('coucou');
         // console.log(pivotData);
@@ -164,13 +164,13 @@ export default function Experience() {
         {/* </Environment> */}
 
         {/* <AccumulativeShadows
-            position={ [ 0, -0.99, 0 ] }
+            position={ [ 0, 0.1, 0 ] }
             scale={ 10 }
-            color="#316d39"
-            opacity={ .8 }
+            color={shColor}
+            opacity={shOpacity}
             frames={ Infinity }
             temporal
-            blend={ 100 }
+            blend={shBlur}
             >
             <RandomizedLight
                 position={ [ 1, 2, 3 ] }
@@ -194,9 +194,9 @@ export default function Experience() {
         /> */}
 
         {/* Lights */}
-        {/* <directionalLight
+        <directionalLight
             ref={directionalLightRef}
-            position={ sunPosition }
+            position={sunPosition}
             intensity={1.5}
             castShadow
             shadow-mapSize={[ 1024, 1024 ]}
@@ -207,7 +207,7 @@ export default function Experience() {
             shadow-camera-bottom={-5}
             shadow-camera-left={-5}
         />
-        <ambientLight intensity={0.5} /> */}
+        <ambientLight intensity={0.5} />
 
         {/* Sky */}
         {/* <Sky sunPosition={ sunPosition } /> */}
@@ -216,7 +216,7 @@ export default function Experience() {
         {/* <BakeShadows /> */}
 
         {/* Objects */}
-        <group ref={groupRef}>
+        {/* <group ref={groupRef}> */}
 
             {/* Sphere */}
             {/* <PivotControls
@@ -248,7 +248,7 @@ export default function Experience() {
             </mesh> */}
             {/* <TransformControls object={cubeRef} mode="translate" /> */}
 
-        </group>
+        {/* </group> */}
 
         {/* Floor */}
         {/* <mesh ref={planeRef} rotation-x={-Math.PI * 0.5} scale={10} position-y={0}> */}
@@ -263,39 +263,47 @@ export default function Experience() {
             /> */}
         {/* </mesh> */}
 
-        {/* Floating text */}
-        <Float
-            speed={5}
-            floatIntensity={1.5}>
-            <Text
-                font='./raleway-bold.woff'
-                fontSize={1}
-                color="salmon"
-                style={{ textTransform: 'uppercase' }}
-                position-y={3}
-                maxWidth={2}
-                textAlign="center">
-                Hello there!
-                <meshStandardMaterial envMapIntensity={envMapIntensity} side={2} />
-            </Text>
-        </Float>
-
-        <Stage
+        {/* <Stage
             contactShadow={{ opacity: 0.2, blur: 3 }}
             environment='sunset'
             preset='portrait'
             intensity={ 1.5 }
-        >
-            <mesh ref={cubeRef} castShadow rotation-y={Math.PI * 0.23} position-x={2} position-y={1} scale={cuScale}>
+        > */}
+        {/* <mesh ref={cubeRef} castShadow rotation-y={Math.PI * 0.23} position-x={2} position-y={1} scale={cuScale}>
                 <boxGeometry scale={1.5} />
                 <meshStandardMaterial color="mediumpurple" envMapIntensity={envMapIntensity} />
-            </mesh>
+            </mesh> */}
 
-            <mesh ref={sphereRef} castShadow position={[ spPosition.x, spPosition.y, 0 ]} visible={spVisible}>
+        {/* <mesh ref={sphereRef} castShadow position={[ spPosition.x, spPosition.y, 0 ]} visible={spVisible}>
                 <sphereGeometry />
                 <meshStandardMaterial envMapIntensity={envMapIntensity} color={spColor} />
-            </mesh>
-        </Stage>
+            </mesh> */}
+
+        {/* Suspense is used to lazyload components, fallback is used to show something while the component is loading */}
+        <Suspense fallback={<Placeholder position-y={.5} scale={[ 2, 3, 2 ]} />}>
+
+            {/* Floating text */}
+            <Float
+                speed={5}
+                floatIntensity={1.5}>
+                <Text
+                    font='./raleway-bold.woff'
+                    fontSize={1}
+                    color="salmon"
+                    style={{ textTransform: 'uppercase' }}
+                    position-y={3}
+                    maxWidth={2}
+                    castShadow
+                    textAlign="center">
+                    Hello there!
+                    <meshStandardMaterial envMapIntensity={envMapIntensity} side={2} />
+                </Text>
+            </Float>
+
+            <Model />
+        </Suspense>
+
+        {/* </Stage> */}
 
     </>
 }

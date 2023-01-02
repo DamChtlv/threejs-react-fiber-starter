@@ -21,7 +21,7 @@ root.render(
                 near: 0.1,
                 far: 200,
                 // zoom: 100,
-                position: [ -4, 3, 8 ]
+                position: [ 0, 0, 9.1 ]
             }}>
 
             <Experience /> {/* Our custom experience component */}
