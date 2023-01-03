@@ -4,7 +4,10 @@ import { Stage, Lightformer, Environment, Sky, ContactShadows, RandomizedLight, 
 import { useControls, button } from 'leva'; // useControls is a GUI to control values
 import { Perf } from 'r3f-perf'; // Perf is a UI that display performances infos
 // import * as THREE from 'three';
-import Model from './components/Model';
+// import Model from './components/Model';
+// import Katana from './components/Katana';
+// import StonePillar from './components/StonePillar';
+import Stegosaur from './components/Stegosaur';
 import Placeholder from './components/Placeholder';
 
 // Make shadows more blurry when there are far from their elements
@@ -127,7 +130,7 @@ export default function Experience() {
         {showPerf && <Perf position="top-left" />}
 
         {/* Controls orientation of the scene */}
-        <OrbitControls makeDefault />
+        <OrbitControls makeDefault autoRotate autoRotateSpeed={1}  />
 
         {/* Environment map is used to have natural lights &/or background images */}
         {/* <Environment
@@ -292,6 +295,7 @@ export default function Experience() {
                     color="salmon"
                     style={{ textTransform: 'uppercase' }}
                     position-y={3}
+                    position-z={1.5}
                     maxWidth={2}
                     castShadow
                     textAlign="center">
@@ -300,7 +304,7 @@ export default function Experience() {
                 </Text>
             </Float>
 
-            <Model />
+            <Stegosaur />
         </Suspense>
 
         {/* </Stage> */}

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, useFBX } from "@react-three/drei";
+import { Clone, useGLTF, useFBX } from "@react-three/drei";
 
 export default function Model({ children }) {
 
@@ -16,7 +16,12 @@ export default function Model({ children }) {
         modelRef.current.rotation.y -= delta / 3
     })
 
-    return (
-        <primitive ref={modelRef} object={model.scene ?? model} position={[ 3, 0.25, 0 ]} scale={model?.scene ? 0.015 : 1} />
-    )
+    return <>
+        <Clone ref={modelRef} object={ model.scene ?? model } position={[ -3, 0.25, 0 ]} scale={model?.scene ? 0.015 : 1} />
+        <Clone ref={modelRef} object={ model.scene ?? model } position={[ 0, 0.25, 0 ]} scale={model?.scene ? 0.015 : 1} />
+        <Clone ref={modelRef} object={ model.scene ?? model } position={[ 3, 0.25, 0 ]} scale={model?.scene ? 0.015 : 1} />
+        {/* <primitive ref={modelRef} object={model.scene ?? model} position={[ 3, 0.25, 0 ]} scale={model?.scene ? 0.015 : 1} /> */}
+    </>
 }
+
+useGLTF.preload('./stone_pillar.glb')
